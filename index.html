@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR QUANTUM // Futuristic QR Generator</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;700&family=Space+Grotesk:wght@400;500;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <!-- QR Code Generator Library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
+    <!-- jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Top Brutalist Header Navigation -->
+        <header class="main-header">
+            <div class="header-cell logo-cell">
+                <span class="brand-logo">✦ QR QUANTUM</span>
+            </div>
+            <div class="header-cell nav-cell">
+                <span class="nav-link active" data-tab="generate">GENERATE</span>
+                <span class="nav-divider">/</span>
+                <span class="nav-link" data-tab="customize">CUSTOMIZE</span>
+                <span class="nav-divider">/</span>
+                <span class="nav-link" data-tab="preview">PREVIEW</span>
+                <span class="nav-divider">/</span>
+                <span class="nav-link" data-tab="history">HISTORY</span>
+                <span class="nav-divider">/</span>
+                <span class="nav-link" data-tab="help">HELP</span>
+            </div>
+            <div class="header-cell time-cell">
+                <span class="cell-label">SYSTEM TIME</span>
+                <span class="cell-value" id="headerTime">17:19:20</span>
+                <span class="cell-sub">UTC+0</span>
+            </div>
+            <div class="header-cell action-cell">
+                <button class="header-btn" id="headerGenBtn">GENERATE QR ↗</button>
+            </div>
+        </header>
+
+        <!-- Main Workspace (Tabbed) -->
+        <main class="workspace-brutalist">
+            
+            <!-- Left Column: Tab contents -->
+            <div class="workspace-tabs-col">
+                
+                <!-- 1. GENERATE TAB -->
+                <div id="tab-generate" class="tab-content active">
+                    <div class="tab-section">
+                        <span class="section-num">/01</span>
+                        <h1 class="main-title">QR GENERATOR</h1>
+                        <p class="subtitle-badge">Create custom QR codes instantly</p>
+                        <p class="promo-text">
+                            Enter your text or URL below to automatically generate your QR code. Toggle tabs above to customize styling and download vector files.
+                        </p>
+                        
+                        <!-- Text Input Box -->
+                        <div class="brutalist-input-box">
+                            <label for="qrText" class="input-label">ENTER TEXT OR URL</label>
+                            <div class="input-container">
+                                <span class="prompt-symbol">&gt;</span>
+                                <input type="text" id="qrText" placeholder="Type link or text here to generate..." autocomplete="off">
+                            </div>
+                        </div>
+
+                        <!-- Action buttons -->
+                        <div class="control-actions">
+                            <button class="brut-btn btn-black" id="generateBtn">
+                                <span>GENERATE QR</span>
+                                <span class="arrow">↗</span>
+                            </button>
+                            <button class="brut-btn btn-outline" id="clearBtn">
+                                <span>CLEAR ALL</span>
+                                <span class="symbol">[ ]</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. CUSTOMIZE TAB -->
+                <div id="tab-customize" class="tab-content">
+                    <!-- Style settings -->
+                    <div class="tab-section border-bottom">
+                        <span class="section-num">/02</span>
+                        <h2 class="block-title">CUSTOMIZE STYLE</h2>
+                        <p class="block-subtitle">Adjust core QR variables, dimensions, and error tolerance strength.</p>
+                        
+                        <div class="params-grid">
+                            <div class="param-cell">
+                                <span class="param-label">QR CODE COLOR</span>
+                                <div class="param-control color-control">
+                                    <input type="color" id="fgColor" value="#000000">
+                                    <span class="color-hex" id="fgColorVal">#000000</span>
+                                </div>
+                                <span class="param-desc">Change modules fill color.</span>
+                            </div>
+                            <div class="param-cell border-left">
+                                <span class="param-label">BACKGROUND COLOR</span>
+                                <div class="param-control color-control">
+                                    <input type="color" id="bgColor" value="#ffffff">
+                                    <span class="color-hex" id="bgColorVal">#FFFFFF</span>
+                                </div>
+                                <span class="param-desc">Change background fill color.</span>
+                            </div>
+                        </div>
+                        
+                        <div class="params-grid border-top">
+                            <div class="param-cell">
+                                <div class="param-header-row">
+                                    <span class="param-label">QUIET ZONE MARGIN</span>
+                                    <span class="param-val-text" id="marginVal">2</span>
+                                </div>
+                                <div class="param-control slider-control">
+                                    <input type="range" id="qrMargin" min="0" max="6" step="1" value="2">
+                                </div>
+                                <span class="param-desc">Adjust the whitespace padding.</span>
+                            </div>
+                            <div class="param-cell border-left">
+                                <div class="param-header-row">
+                                    <span class="param-label">QR SIZE (PX)</span>
+                                    <span class="param-val-text" id="sizeVal">300</span>
+                                </div>
+                                <div class="param-control slider-control">
+                                    <input type="range" id="qrSize" min="200" max="800" step="50" value="300">
+                                </div>
+                                <span class="param-desc">Adjust output canvas resolution.</span>
+                            </div>
+                            <div class="param-cell border-left">
+                                <span class="param-label">SCAN RELIABILITY</span>
+                                <div class="param-control select-control">
+                                    <select id="errorCorrection">
+                                        <option value="L">LOW (7% RECOVERY)</option>
+                                        <option value="M">MEDIUM (15% RECOVERY)</option>
+                                        <option value="Q">QUARTILE (25% RECOVERY)</option>
+                                        <option value="H" selected>HIGH (30% RECOVERY)</option>
+                                    </select>
+                                </div>
+                                <span class="param-desc">Protects against damage or logos.</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Shape and Logo uploads -->
+                    <div class="tab-section">
+                        <span class="section-num">/03</span>
+                        <div class="custom-inputs-split">
+                            <div class="shape-cell">
+                                <h2 class="block-title">ROUNDED STYLE</h2>
+                                <p class="block-subtitle">Toggle rounded dots for a softer design style.</p>
+                                <div class="brutalist-toggle-card">
+                                    <div class="toggle-label-row">
+                                        <span class="label-heading">ROUNDED DOTS</span>
+                                        <span class="label-status text-purple" id="dotsStatus">INACTIVE</span>
+                                    </div>
+                                    <label class="brutalist-switch" for="roundedQr">
+                                        <input type="checkbox" id="roundedQr">
+                                        <span class="switch-slider"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="logo-cell border-left">
+                                <h2 class="block-title">ADD CENTER LOGO</h2>
+                                <p class="block-subtitle">Overlay a custom image in the center.</p>
+                                <div class="brutalist-upload-box">
+                                    <div class="file-drop-zone" id="dropZone">
+                                        <span class="plus-sign">+</span>
+                                        <span class="drop-text">DRAG & DROP LOGO OR CLICK TO UPLOAD</span>
+                                        <input type="file" id="logoUpload" accept="image/*" class="file-input">
+                                    </div>
+                                    <div class="logo-preview-container" id="logoPreviewContainer" style="display: none;">
+                                        <div class="logo-preview-badge">
+                                            <img id="logoPreview" src="" alt="Logo">
+                                            <span class="logo-name" id="logoName">logo.png</span>
+                                        </div>
+                                        <button type="button" class="remove-logo-btn" id="removeLogo">REMOVE LOGO [X]</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. PREVIEW & EXPORTS TAB -->
+                <div id="tab-preview" class="tab-content">
+                    <div class="tab-section">
+                        <span class="section-num">/04</span>
+                        <h2 class="block-title">DOWNLOAD & SHARE</h2>
+                        <p class="block-subtitle">Export your generated QR code in multiple vector and image formats.</p>
+                        
+                        <div class="exports-grid-brut">
+                            <button class="export-btn-large" id="downloadPng" disabled>
+                                <span class="btn-text">DOWNLOAD PNG IMAGE</span>
+                                <span class="btn-desc">High-resolution raster file, best for web and sharing.</span>
+                                <span class="arrow">↗</span>
+                            </button>
+                            <button class="export-btn-large border-top" id="downloadSvg" disabled>
+                                <span class="btn-text">DOWNLOAD SVG VECTOR</span>
+                                <span class="btn-desc">Infinite scaling vector path, best for digital print designs.</span>
+                                <span class="arrow">↗</span>
+                            </button>
+                            <button class="export-btn-large border-top" id="downloadPdf" disabled>
+                                <span class="btn-text">DOWNLOAD PRINT PDF</span>
+                                <span class="btn-desc">Print-ready printable document sheet with technical specs.</span>
+                                <span class="arrow">↗</span>
+                            </button>
+                            <button class="export-btn-large border-top" id="copyUrl" disabled>
+                                <span class="btn-text">COPY SOURCE DATA</span>
+                                <span class="btn-desc">Copy your encoded raw text parameter to clipboard.</span>
+                                <span class="arrow">↗</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. HISTORY TAB -->
+                <div id="tab-history" class="tab-content">
+                    <div class="tab-section border-bottom">
+                        <div class="history-header-row">
+                            <div>
+                                <span class="section-num">/05</span>
+                                <h2 class="block-title">GENERATION HISTORY</h2>
+                                <p class="block-subtitle">Load and edit previously generated codes cached in storage.</p>
+                            </div>
+                            <button class="btn-clear-history" id="clearHistoryBtn">CLEAR HISTORY [X]</button>
+                        </div>
+                        <div class="history-panel-brut-container">
+                            <ul class="history-list" id="historyList">
+                                <li class="history-empty">// NO RECENT RECORDS FOUND //</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="tab-section">
+                        <span class="section-num">/06</span>
+                        <h2 class="block-title">ENGINE PERFORMANCE</h2>
+                        <p class="block-subtitle">Simulated rendering capacity metrics and scanning readiness diagnostics.</p>
+                        
+                        <div class="status-metrics">
+                            <div class="status-row">
+                                <span class="status-label">DATA DENSITY</span>
+                                <div class="progress-container">
+                                    <div class="progress-bar" id="loadBar" style="width: 0%;"></div>
+                                </div>
+                                <span class="status-percent" id="loadPercent">0%</span>
+                            </div>
+                            <div class="status-row">
+                                <span class="status-label">ERROR PROTECTION</span>
+                                <div class="progress-container">
+                                    <div class="progress-bar purple-bar" id="redundancyBar" style="width: 30%;"></div>
+                                </div>
+                                <span class="status-percent" id="redundancyPercent">30%</span>
+                            </div>
+                            <div class="status-row">
+                                <span class="status-label">SCAN STATUS</span>
+                                <span class="status-value text-mono">OPTIMAL</span>
+                            </div>
+                        </div>
+                        <div class="operational-banner">
+                            <span class="pulse-indicator-brut"></span>
+                            <span class="banner-text">ALL SYSTEMS READY</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. HELP TAB -->
+                <div id="tab-help" class="tab-content">
+                    <div class="tab-section">
+                        <span class="section-num">/07</span>
+                        <h2 class="block-title">USER GUIDE & FAQ</h2>
+                        <p class="block-subtitle">Learn how to customize, scan, and print your brutalist QR codes.</p>
+                        
+                        <div class="help-grid">
+                            <div class="help-item">
+                                <h3>How to Generate?</h3>
+                                <p>Type any text, link, email, or WiFi coordinates in the <strong>GENERATE</strong> input field. The QR code canvas will update instantly in the preview panel.</p>
+                            </div>
+                            <div class="help-item border-top">
+                                <h3>Customizing Styles & Colors</h3>
+                                <p>Under the <strong>CUSTOMIZE</strong> tab, click the color boxes to alter foreground and background colors. Adjust Margins and Resolution (size) using the sliders.</p>
+                            </div>
+                            <div class="help-item border-top">
+                                <h3>Center Logos & Safety Margin</h3>
+                                <p>You can drag and drop a custom logo image in the <strong>CUSTOMIZE</strong> logo panel. We automatically mask the center and draw a bounding border. Note: Ensure <strong>SCAN RELIABILITY</strong> is set to HIGH so the code remains readable.</p>
+                            </div>
+                            <div class="help-item border-top">
+                                <h3>SVG vs. PNG vs. PDF</h3>
+                                <p>Go to the <strong>PREVIEW</strong> tab to download. Use PNG for web sharing, SVG vector paths for resizing inside design software without quality loss, and PDF for high-fidelity technical printable layouts.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Right Column: Persistent Preview -->
+            <div class="workspace-preview-col border-left">
+                <!-- Tech indicators -->
+                <div class="panel-meta-header">
+                    <span class="meta-indicator">&gt; PREVIEW</span>
+                    <span class="meta-value text-purple" id="renderPercent">100%</span>
+                </div>
+
+                <!-- Cyber Code Frame -->
+                <div class="qr-preview-box">
+                    <!-- Corner Crosshairs -->
+                    <span class="crosshair ch-tl">+</span>
+                    <span class="crosshair ch-tr">+</span>
+                    <span class="crosshair ch-bl">+</span>
+                    <span class="crosshair ch-br">+</span>
+
+                    <!-- Matrix Coordinates Badge (Lime) -->
+                    <div class="coords-badge">
+                        <div>X_36.1749</div>
+                        <div>Y_-86.7676</div>
+                        <div>Z_46.6827</div>
+                    </div>
+
+                    <!-- Canvas Holder -->
+                    <div class="qr-canvas-holder">
+                        <canvas id="qrCanvas"></canvas>
+                        <div class="qr-placeholder" id="qrPlaceholder">
+                            <div class="placeholder-grid"></div>
+                            <span class="placeholder-label">// PREVIEW PANEL //</span>
+                        </div>
+                    </div>
+
+                    <!-- Speeder Loader Container -->
+                    <div class="loader-container" id="qrLoader">
+                        <div class="loader">
+                            <span><span></span><span></span><span></span><span></span></span>
+                            <div class="base">
+                                <span></span>
+                                <div class="face"></div>
+                            </div>
+                        </div>
+                        <div class="longfazers">
+                            <span></span><span></span><span></span><span></span>
+                        </div>
+                    </div>
+
+                    <div class="scanline"></div>
+                </div>
+
+                <div class="preview-metrics">
+                    <div class="metric-col">
+                        <span class="metric-label">CONTENT TYPE</span>
+                        <span class="metric-val text-purple" id="infoType">--</span>
+                    </div>
+                    <div class="metric-col border-left">
+                        <span class="metric-label">IMAGE SIZE</span>
+                        <span class="metric-val" id="infoSize">300×300 PX</span>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- Double-tier Professional Footer -->
+        <footer class="app-footer-brutalist">
+            <div class="footer-top-row">
+                <div class="footer-brand-section">
+                    <span class="footer-logo">✦ QR QUANTUM</span>
+                    <p class="footer-brand-desc">A premium, client-side digital generator for customizable vector QR codes.</p>
+                </div>
+                <div class="footer-socials-section">
+                    <span class="socials-label">CONNECT WITH DEVELOPER:</span>
+                    <div class="socials-grid">
+                        <a href="https://www.linkedin.com/in/divyanshu-mehra-6a5377384/" target="_blank" class="social-icon-btn" title="LinkedIn">
+                            <svg viewBox="0 0 24 24" width="16" height="16">
+                                <path fill="currentColor" d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.779-1.75-1.75s.784-1.75 1.75-1.75 1.75.779 1.75 1.75-.784 1.75-1.75 1.75zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                            </svg>
+                        </a>
+                        <a href="https://github.com/Divyanshumehra-01" target="_blank" class="social-icon-btn" title="GitHub">
+                            <svg viewBox="0 0 24 24" width="16" height="16">
+                                <path fill="currentColor" d="M12 2C6.477 2 2 6.477 2 12c0 4.42 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.464-1.11-1.464-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.579.688.481C19.138 20.164 22 16.416 22 12c0-5.523-4.477-10-10-10z"/>
+                            </svg>
+                        </a>
+                        <a href="https://www.instagram.com/_daksh.mehra_221" target="_blank" class="social-icon-btn" title="Instagram">
+                            <svg viewBox="0 0 24 24" width="16" height="16">
+                                <path fill="currentColor" d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.051.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer-bottom-row">
+                <div class="footer-copyright">
+                    &copy; 2026 QR QUANTUM. ALL RIGHTS RESERVED.
+                </div>
+                <div class="footer-credits">
+                    DEVELOPED BY <a href="https://github.com/Divyanshumehra-01" target="_blank" class="footer-author-link">DIVYANSHU MEHRA</a>
+                </div>
+                <div class="footer-status">
+                    <span class="status-indicator-dot"></span>
+                    <span>ENGINE STATUS: ONLINE</span>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Notification system -->
+    <div class="notification-toast" id="toast">Copied to clipboard!</div>
+
+    <script src="script.js"></script>
+</body>
+</html>
